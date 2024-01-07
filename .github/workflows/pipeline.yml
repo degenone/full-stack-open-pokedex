@@ -8,8 +8,22 @@ on:
         types: ["opened", "synchronize"]
 
 jobs:
+    check-for-skip:
+        runs-on: ubuntu-20.04
+        outputs:
+            skip: ${{ steps.skip.outcome.skip }}
+        steps:
+            - uses: actions/checkout@v3
+            - id: skip
+              env:
+                COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
+              run: |
+                  skip=$(echo "$COMMIT_MESSAGES" | grep -qi '#skip' && echo true || echo false)
+                  echo "skip=$skip" >> "$GITHUB_OUTPUT"
+    
     pipeline:
         runs-on: ubuntu-20.04
+        needs: check-for-skip
         steps:
             - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
@@ -29,11 +43,12 @@ jobs:
                 start: npm run start-prod
                 wait-on: http://localhost:5000
             - name: Deploy to Render
-              if: github.event_name == 'push'
+              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
               run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+
     tag_releases:
-        if: github.event_name == 'push'
-        needs: pipeline
+        needs: [pipeline, check-for-skip]
+        if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
