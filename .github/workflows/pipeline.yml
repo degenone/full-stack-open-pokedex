@@ -47,7 +47,7 @@ jobs:
               if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
               run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
             - name: Discord notificatoin
-              if: ${{ vars.DISCORD_WEBHOOK_ACTIVE == 'true' && (github.event_name == 'push' || job.status != 'success') }}
+              if: always()
               uses: sarisia/actions-status-discord@v1.13.0
               with:
                 webhook: ${{ secrets.DISCORD_WEBHOOK }}
@@ -56,7 +56,7 @@ jobs:
                 description: 'Build, test, and deploy to Render'
                 url: 'https://pokedex-fso-degenone.onrender.com/'
                 username: GitHub Actions
-                content: 'Action triggered by ${{ github.actor }}'
+                content: '${{ github.event_name }} by ${{ github.actor }}'
 
     tag_releases:
         needs: [pipeline, check-for-skip]
