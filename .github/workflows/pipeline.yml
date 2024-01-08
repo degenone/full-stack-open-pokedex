@@ -47,8 +47,8 @@ jobs:
               if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
               run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
             - name: Discord notificatoin
-              if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true' }}
-              uses: sarisia/actions-status-discord@39cfaba7f63491d4022b7593b9956b2aca68e2ed
+              if: ${{ vars.DISCORD_WEBHOOK_ACTIVE == 'true' }}
+              uses: sarisia/actions-status-discord@v1.13.0
               with:
                 webhook: ${{ secrets.DISCORD_WEBHOOK }}
                 status: ${{ job.status }}
