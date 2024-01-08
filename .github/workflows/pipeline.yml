@@ -18,7 +18,8 @@ jobs:
               env:
                 COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
               run: |
-                  skip=$(echo "$COMMIT_MESSAGES" | grep -qi '#skip' && echo true || echo false)
+                  skip=$(echo "$COMMIT_MESSAGES" | grep -qi "#skip" && echo true || echo false)
+                  echo $skip
                   echo "skip=$skip" >> "$GITHUB_OUTPUT"
     
     pipeline:
@@ -46,7 +47,7 @@ jobs:
               if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
               run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
             - name: Discord notificatoin
-              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE
+              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true'
               uses: sarisia/actions-status-discord@39cfaba7f63491d4022b7593b9956b2aca68e2ed
               with:
                 webhook: ${{ secrets.DISCORD_WEBHOOK }}
