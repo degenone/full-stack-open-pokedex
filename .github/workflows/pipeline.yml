@@ -26,6 +26,20 @@ jobs:
         runs-on: ubuntu-20.04
         needs: check-for-skip
         steps:
+            - name: test printout
+              env:
+                is_push: ${{ github.event_name == 'push' }}
+                should_skip: ${{ needs.check-for-skip.outputs.skip == 'false' }}
+                should_deploy: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
+                should_notify: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true' }}
+              run: |
+                echo "event_name=${{ github.event_name }}"
+                echo "outputs.skip=${{ needs.check-for-skip.outputs.skip }}"
+                echo "active=${{ vars.DISCORD_WEBHOOK_ACTIVE }}"
+                echo "is_push=${{ env.is_push }}"
+                echo "should_skip=${{ env.should_skip }}"
+                echo "should_deploy=${{ env.should_deploy }}"
+                echo "should_notify=${{ env.should_notify }}"
             - uses: actions/checkout@v3
             - uses: actions/setup-node@v3
               with:
@@ -44,10 +58,10 @@ jobs:
                 start: npm run start-prod
                 wait-on: http://localhost:5000
             - name: Deploy to Render
-              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
+              if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
               run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
             - name: Discord notificatoin
-              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true'
+              if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true' }}
               uses: sarisia/actions-status-discord@39cfaba7f63491d4022b7593b9956b2aca68e2ed
               with:
                 webhook: ${{ secrets.DISCORD_WEBHOOK }}
@@ -60,7 +74,7 @@ jobs:
 
     tag_releases:
         needs: [pipeline, check-for-skip]
-        if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
+        if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
