@@ -11,7 +11,7 @@ jobs:
             - name: check
               uses: Jtalk/url-health-check-action@v3.2
               with:
-                url: https://pokedex-fso-degenone.onrender.com/health
+                url: https://pokedex-fso-degenone.onrender.com/healthz
             - name: report
               if: always()
               env:
