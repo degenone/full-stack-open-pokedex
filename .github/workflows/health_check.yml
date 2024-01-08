@@ -6,6 +6,7 @@ on:
 
 jobs:
     health_check:
+        if: ${{ vars.HEALTH_CHECK_ACTIVE == 'true' }}
         runs-on: ubuntu-latest
         steps:
             - name: check
