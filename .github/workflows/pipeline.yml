@@ -11,7 +11,7 @@ jobs:
     check-for-skip:
         runs-on: ubuntu-20.04
         outputs:
-            skip: ${{ steps.skip.outcome.skip }}
+            skip: ${{ steps.skip.outputs.skip }}
         steps:
             - uses: actions/checkout@v3
             - id: skip
@@ -44,10 +44,10 @@ jobs:
                 start: npm run start-prod
                 wait-on: http://localhost:5000
             - name: Deploy to Render
-              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
+              if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
               run: curl ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
             - name: Discord notificatoin
-              if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true'
+              if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' && vars.DISCORD_WEBHOOK_ACTIVE == 'true' }}
               uses: sarisia/actions-status-discord@39cfaba7f63491d4022b7593b9956b2aca68e2ed
               with:
                 webhook: ${{ secrets.DISCORD_WEBHOOK }}
@@ -60,7 +60,7 @@ jobs:
 
     tag_releases:
         needs: [pipeline, check-for-skip]
-        if: github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false'
+        if: ${{ github.event_name == 'push' && needs.check-for-skip.outputs.skip == 'false' }}
         runs-on: ubuntu-20.04
         steps:
             - uses: actions/checkout@v3
