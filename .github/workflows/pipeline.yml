@@ -19,7 +19,6 @@ jobs:
                 COMMIT_MESSAGES: ${{ toJson(github.event.commits.*.message) }}
               run: |
                   skip=$(echo "$COMMIT_MESSAGES" | grep -qi "#skip" && echo true || echo false)
-                  echo $skip
                   echo "skip=$skip" >> "$GITHUB_OUTPUT"
     
     pipeline:
